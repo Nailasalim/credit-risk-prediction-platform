@@ -1,0 +1,36 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Git & IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets (never bake into images)
+.env
+.env.*
+.streamlit/secrets.toml
+
+# Local overrides
+docker-compose.override.yml
+
+# Notebooks & logs
+notebooks/
+*.log
+tmp/
+temp/
+
+# Large data is mounted at runtime via docker-compose (see README).
+# Omit CSV from image layers to keep builds fast; models/ is copied for offline demo.
+data/*.csv
+data/*.parquet

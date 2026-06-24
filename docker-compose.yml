@@ -1,0 +1,70 @@
+# CreditIQ — API + Streamlit UI
+# Prerequisites: place data/application_train.csv on the host before `docker compose up --build`
+# See README.md § Run With Docker
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: creditiq-app:latest
+    container_name: creditiq-backend
+    command:
+      - uvicorn
+      - src.api.main:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONPATH: /app
+      CREDIT_RISK_PORTFOLIO_CSV: /app/data/application_train.csv
+    volumes:
+      - ./data:/app/data:ro
+      - ./models:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: creditiq-app:latest
+    container_name: creditiq-frontend
+    command:
+      - streamlit
+      - run
+      - ui/streamlit_app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+      - --browser.gatherUsageStats=false
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app
+      CREDIT_RISK_API_URL: http://backend:8000
+      CREDIT_RISK_PORTFOLIO_CSV: /app/data/application_train.csv
+      STREAMLIT_SERVER_FILE_WATCHER_TYPE: none
+    volumes:
+      - ./data:/app/data:ro
+      - ./models:/app/models
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

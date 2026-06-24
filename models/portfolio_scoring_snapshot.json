@@ -1,0 +1,70 @@
+{
+  "source": "batch_model_scoring",
+  "csv_path": "D:\\Naila\\credit_risk_prediction\\data\\application_train.csv",
+  "scored_records": 307511,
+  "portfolio_total": 307511,
+  "observed_default_rate_pct": 8.1,
+  "approval_rate_pct": 56.2,
+  "review_rate_pct": 31.9,
+  "decline_rate_pct": 12.0,
+  "high_risk_count": 36864,
+  "high_risk_pct": 12.0,
+  "probability_bucket_distribution": [
+    {
+      "bucket": "0\u201320%",
+      "count": 68216,
+      "pct": 22.2
+    },
+    {
+      "bucket": "20\u201340%",
+      "count": 104453,
+      "pct": 34.0
+    },
+    {
+      "bucket": "40\u201367%",
+      "count": 97978,
+      "pct": 31.9
+    },
+    {
+      "bucket": "67%+",
+      "count": 36864,
+      "pct": 12.0
+    }
+  ],
+  "risk_band_distribution": [
+    {
+      "band": "LOW",
+      "count": 172669,
+      "pct": 56.2
+    },
+    {
+      "band": "MEDIUM",
+      "count": 97978,
+      "pct": 31.9
+    },
+    {
+      "band": "HIGH",
+      "count": 36864,
+      "pct": 12.0
+    }
+  ],
+  "recommendation_distribution": [
+    {
+      "action": "APPROVE",
+      "count": 172669,
+      "pct": 56.2
+    },
+    {
+      "action": "REVIEW",
+      "count": 97978,
+      "pct": 31.9
+    },
+    {
+      "action": "DECLINE",
+      "count": 36864,
+      "pct": 12.0
+    }
+  ],
+  "threshold": 0.67,
+  "scoring_runtime_seconds": 4.61
+}
