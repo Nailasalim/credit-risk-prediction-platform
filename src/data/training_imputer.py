@@ -16,7 +16,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 
 from src.data.loader import load_feature_names
-from src.data.features import build_model_dataframe
+from src.data.feature_engineering import build_model_dataframe
 from src.data.portfolio_loader import resolve_portfolio_csv
 from src.utils.config import (
     IMPUTER_PATH,

@@ -1,7 +1,5 @@
 """
-Transform raw applicant input into the feature matrix used at training time.
-
-Engineered ratios match the formulas from Phase 1 feature engineering.
+Transform raw applicant input into the 109-feature model matrix.
 """
 
 from __future__ import annotations
@@ -9,16 +7,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import numpy as np
-import pandas as pd
-
-from src.data.loader import load_feature_names
+from src.data.feature_engineering import build_applicant_features
 from src.data.training_imputer import impute_feature_frame
 from src.utils.config import DAYS_EMPLOYED_UNKNOWN
 
 logger = logging.getLogger(__name__)
 
-# Base columns required to compute ratio features (plus any other model inputs).
 RATIO_BASE_COLUMNS = (
     "AMT_INCOME_TOTAL",
     "AMT_CREDIT",
@@ -31,35 +25,14 @@ class PreprocessingError(Exception):
     """Raised when applicant data cannot be converted for prediction."""
 
 
-def _safe_ratio(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
-    """Divide two series; invalid divisions become NaN (same as training with missing values)."""
-    with np.errstate(divide="ignore", invalid="ignore"):
-        result = numerator / denominator
-    return result.replace([np.inf, -np.inf], np.nan)
+def engineer_features(df):
+    """Backward-compatible alias — use build_applicant_features for new code."""
+    from src.data.feature_engineering import engineer_ratio_features
 
-
-def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add ratio features using the same formulas as the training notebook.
-
-    INCOME_CREDIT_RATIO  = AMT_INCOME_TOTAL / AMT_CREDIT
-    ANNUITY_INCOME_RATIO = AMT_ANNUITY / AMT_INCOME_TOTAL
-    CREDIT_GOODS_RATIO   = AMT_CREDIT / AMT_GOODS_PRICE
-    """
-    df = df.copy()
-
-    if "DAYS_EMPLOYED" in df.columns:
-        df["DAYS_EMPLOYED"] = df["DAYS_EMPLOYED"].replace(DAYS_EMPLOYED_UNKNOWN, np.nan)
-
-    df["INCOME_CREDIT_RATIO"] = _safe_ratio(df["AMT_INCOME_TOTAL"], df["AMT_CREDIT"])
-    df["ANNUITY_INCOME_RATIO"] = _safe_ratio(df["AMT_ANNUITY"], df["AMT_INCOME_TOTAL"])
-    df["CREDIT_GOODS_RATIO"] = _safe_ratio(df["AMT_CREDIT"], df["AMT_GOODS_PRICE"])
-
-    return df
+    return engineer_ratio_features(df)
 
 
 def validate_applicant_data(data: dict[str, Any]) -> None:
-    """Ensure required fields are present before feature engineering."""
     if not data:
         raise PreprocessingError("Applicant data is empty.")
 
@@ -70,28 +43,20 @@ def validate_applicant_data(data: dict[str, Any]) -> None:
         )
 
 
-def preprocess_applicant(data: dict[str, Any]) -> pd.DataFrame:
-    """
-    Accept a single applicant record and return a one-row DataFrame
-    with columns ordered for model.predict_proba.
-    """
+def preprocess_applicant(data: dict[str, Any]):
+    """Accept a single applicant record and return imputed features for predict_proba."""
     validate_applicant_data(data)
 
     try:
-        feature_names = load_feature_names()
-        df = pd.DataFrame([data])
-        df = engineer_features(df)
+        if "DAYS_EMPLOYED" in data:
+            employed = data["DAYS_EMPLOYED"]
+            if employed == DAYS_EMPLOYED_UNKNOWN:
+                data = {**data, "DAYS_EMPLOYED": None}
 
-        missing_features = [name for name in feature_names if name not in df.columns]
-        if missing_features:
-            raise PreprocessingError(
-                f"Missing model features after preprocessing: {missing_features}"
-            )
-
-        engineered = df[feature_names]
-        model_input = impute_feature_frame(engineered)
+        features = build_applicant_features(data)
+        model_input = impute_feature_frame(features)
         logger.debug(
-            "Preprocessed applicant with %d features (median-imputed)", len(feature_names)
+            "Preprocessed applicant with %d features (median-imputed)", model_input.shape[1]
         )
         return model_input
     except PreprocessingError:

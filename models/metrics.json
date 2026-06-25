@@ -1,8 +1,11 @@
 {
-    "roc_auc": 0.7516,
-    "accuracy": 0.862,
-    "precision": 0.2566,
-    "recall": 0.3742,
-    "f1_score": 0.3045,
-    "threshold": 0.67
+    "roc_auc": 0.762,
+    "pr_auc": 0.2517,
+    "accuracy": 0.8482,
+    "precision": 0.248,
+    "recall": 0.4336,
+    "f1_score": 0.3156,
+    "threshold": 0.65,
+    "feature_count": 109,
+    "scale_pos_weight": 11.39
 }

@@ -16,6 +16,7 @@ MODEL_PATH: Path = MODELS_DIR / "model.pkl"
 METRICS_PATH: Path = MODELS_DIR / "metrics.json"
 FEATURE_NAMES_PATH: Path = MODELS_DIR / "feature_names.json"
 IMPUTER_PATH: Path = MODELS_DIR / "imputer.pkl"
+ENCODERS_PATH: Path = MODELS_DIR / "label_encoders.pkl"
 SHAP_VALUES_PATH: Path = MODELS_DIR / "shap_values.npy"
 
 # Must match notebooks/edanotebook.ipynb train/test split for imputer fitting

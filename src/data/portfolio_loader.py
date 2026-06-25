@@ -13,7 +13,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from src.data.features import SELECTED_FEATURES, build_model_dataframe
+from src.data.feature_engineering import build_model_dataframe
 from src.utils.config import PROJECT_ROOT
 
 
