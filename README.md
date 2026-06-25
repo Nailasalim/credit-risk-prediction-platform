@@ -249,23 +249,12 @@ All captures live in [`documents/screenshots/`](documents/screenshots/).
 | Rules library | Rule evaluation |
 | ![Decision Rules 1](documents/screenshots/decision_rules1.png) | ![Decision Rules 2](documents/screenshots/decision_rules2.png) |
 
-![Decision Rules 3](documents/screenshots/decision_rules3.png)
-
 ### AI Data Analyst
 
 | | |
 |:---:|:---:|
 | Query & conversation | SQL, results & insight |
 | ![AI Data Analyst 1](documents/screenshots/ai_data_analyst1.png) | ![AI Data Analyst 2](documents/screenshots/ai_data_analyst2.png) |
-
-### Model evaluation (training phase)
-
-| | |
-|:---:|:---:|
-| ROC curve | SHAP summary |
-| ![ROC curve](documents/screenshots/roc_curve.png) | ![SHAP summary](documents/screenshots/shap_summary.png) |
-
-![Confusion matrix](documents/screenshots/confusion_matrix.png)
 
 ---
 
