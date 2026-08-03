@@ -26,6 +26,20 @@ Traditional underwriting is often **slow**, **inconsistent**, and **hard to expl
 
 ---
 
+## Live demo
+
+**App:** [https://creditiq-production.up.railway.app](https://creditiq-production.up.railway.app)
+
+| Username | Password |
+|----------|----------|
+| `analyst` | `AnalystDemo2024` |
+| `admin` | `AdminDemo2024` |
+| `risk_officer` | `RiskDemo2024` |
+
+Hosted on [Railway](https://railway.app). First load may take ~30–60 seconds (cold start on free/trial plans).
+
+---
+
 ## Features
 
 ### Executive Dashboard
