@@ -170,9 +170,33 @@ def get_portfolio_analytics(*, force_refresh: bool = False) -> dict[str, Any]:
     Return portfolio underwriting analytics from CSV scoring (cached snapshot).
 
     Recomputes when CSV is newer than the snapshot or when force_refresh=True.
+    Set CREDITIQ_USE_SNAPSHOT_ONLY=1 on small hosts (Railway) to skip re-scoring
+    and avoid OOM — uses models/portfolio_scoring_snapshot.json only.
     """
+    import os
+
+    snapshot_only = os.environ.get("CREDITIQ_USE_SNAPSHOT_ONLY", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+    if snapshot_only and not force_refresh:
+        snapshot = load_portfolio_snapshot()
+        if snapshot is not None:
+            logger.info("Using portfolio snapshot only (CREDITIQ_USE_SNAPSHOT_ONLY)")
+            return snapshot
+        raise FileNotFoundError(
+            "CREDITIQ_USE_SNAPSHOT_ONLY=1 but models/portfolio_scoring_snapshot.json is missing."
+        )
+
     csv_path = resolve_portfolio_csv()
     if csv_path is None:
+        # Fall back to committed snapshot when CSV is absent (hosted demos)
+        snapshot = load_portfolio_snapshot()
+        if snapshot is not None:
+            logger.warning("CSV missing — serving portfolio snapshot KPIs only")
+            return snapshot
         raise FileNotFoundError(
             "Portfolio CSV not found. Expected data/application_train.csv (gitignored)."
         )

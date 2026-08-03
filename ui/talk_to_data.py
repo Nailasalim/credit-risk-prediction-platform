@@ -58,12 +58,20 @@ class QueryResult:
 
 @st.cache_data(show_spinner="Loading Home Credit application data…")
 def load_data() -> pd.DataFrame:
+    import os
+
     path = resolve_portfolio_csv()
     if path is None:
         raise FileNotFoundError(
             "application_train.csv not found. Place it at data/application_train.csv "
             "or set CREDIT_RISK_PORTFOLIO_CSV."
         )
+    # Small Railway plans: sample rows to avoid OOM (full file ~159MB + SQLite)
+    sample = os.environ.get("CREDITIQ_HOSTED_SAMPLE_ROWS", "").strip()
+    if sample.isdigit() and int(sample) > 0:
+        return pd.read_csv(path, nrows=int(sample))
+    if os.environ.get("CREDITIQ_USE_SNAPSHOT_ONLY", "").strip().lower() in {"1", "true", "yes"}:
+        return pd.read_csv(path, nrows=50_000)
     return pd.read_csv(path)
 
 
