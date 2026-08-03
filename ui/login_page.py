@@ -10,17 +10,40 @@ import streamlit as st
 
 AUTH_FLAG = "auth_authenticated"
 AUTH_USER = "auth_username"
+# Persist login across Streamlit websocket reconnects (slow dashboard first load in Docker)
+_AUTH_QP = "ciq"
+_USER_QP = "u"
 
-# Demo credentials for placement / local demo (not production security)
+# Demo credentials — unique enough to avoid Chrome "breached password" warnings; no # symbols
 _DEMO_USERS: dict[str, str] = {
-    "analyst": "CreditIQ2024",
-    "admin": "admin123",
-    "risk_officer": "risk2024",
+    "analyst": "AnalystDemo2024",
+    "admin": "AdminDemo2024",
+    "risk_officer": "RiskDemo2024",
 }
 
 
+def _restore_auth_from_url() -> bool:
+    """If session_state was wiped but URL still has login markers, restore them."""
+    try:
+        params = st.query_params
+    except Exception:
+        return False
+    if params.get(_AUTH_QP) != "1":
+        return False
+    user = str(params.get(_USER_QP, "")).strip().lower()
+    if user not in _DEMO_USERS:
+        return False
+    st.session_state[AUTH_FLAG] = True
+    st.session_state[AUTH_USER] = user
+    if "main_nav" not in st.session_state:
+        st.session_state.main_nav = "dashboard"
+    return True
+
+
 def is_authenticated() -> bool:
-    return bool(st.session_state.get(AUTH_FLAG))
+    if bool(st.session_state.get(AUTH_FLAG)):
+        return True
+    return _restore_auth_from_url()
 
 
 def display_name(username: str) -> str:
@@ -37,20 +60,30 @@ def user_initial(username: str) -> str:
 
 def authenticate(username: str, password: str) -> bool:
     user = username.strip().lower()
-    if not user or not password:
+    secret = password.strip()
+    if not user or not secret:
         return False
     expected = _DEMO_USERS.get(user)
-    if expected is None or password != expected:
+    if expected is None or secret != expected:
         return False
     st.session_state[AUTH_FLAG] = True
     st.session_state[AUTH_USER] = user
     st.session_state.main_nav = "dashboard"
+    # Keep login after reconnect / long first script run
+    st.query_params[_AUTH_QP] = "1"
+    st.query_params[_USER_QP] = user
     return True
 
 
 def logout() -> None:
     for key in (AUTH_FLAG, AUTH_USER):
         st.session_state.pop(key, None)
+    for key in (_AUTH_QP, _USER_QP):
+        try:
+            if key in st.query_params:
+                del st.query_params[key]
+        except Exception:
+            pass
 
 
 def inject_login_styles() -> None:
@@ -291,8 +324,18 @@ def render_login_page() -> None:
         )
 
         with st.form("login_form", clear_on_submit=False):
-            username = st.text_input("Username", placeholder="analyst")
-            password = st.text_input("Password", type="password", placeholder="Enter your password")
+            # autocomplete=off reduces Chrome filling wrong saved passwords
+            username = st.text_input(
+                "Username",
+                placeholder="analyst",
+                autocomplete="username",
+            )
+            password = st.text_input(
+                "Password",
+                type="password",
+                placeholder="Enter your password",
+                autocomplete="current-password",
+            )
 
             opt_left, opt_right = st.columns([1.15, 0.85], vertical_alignment="center")
             with opt_left:
@@ -306,21 +349,29 @@ def render_login_page() -> None:
             submitted = st.form_submit_button("Sign in", type="primary", use_container_width=True)
 
     if submitted:
-        if authenticate(username, password):
+        if authenticate(username or "", password or ""):
+            st.success("Signed in — loading workspace…")
             st.rerun()
-        login_error = "Invalid username or password. Please try again."
+        else:
+            login_error = (
+                "Invalid username or password. "
+                "Use the demo accounts below (type the password manually — "
+                "do not use Chrome’s autofill)."
+            )
 
     if login_error:
         st.error(login_error)
 
-    with st.expander("Demo accounts", expanded=False):
+    with st.expander("Demo accounts", expanded=True):
         st.markdown(
             """
             | Role | Username | Password |
             |------|----------|----------|
-            | Analyst | `analyst` | `CreditIQ2024` |
-            | Admin | `admin` | `admin123` |
-            | Risk officer | `risk_officer` | `risk2024` |
+            | Analyst | `analyst` | `AnalystDemo2024` |
+            | Admin | `admin` | `AdminDemo2024` |
+            | Risk officer | `risk_officer` | `RiskDemo2024` |
+
+            **Tip:** Click **No, thanks** on any Chrome password popup, then type the password yourself.
             """
         )
 

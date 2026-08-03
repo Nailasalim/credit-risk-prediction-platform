@@ -4,3 +4,14 @@ showSidebarNavigation = false
 
 [browser]
 gatherUsageStats = false
+
+[server]
+# Survive slow first dashboard load (portfolio scoring) without dropping the session
+enableWebsocketCompression = false
+maxMessageSize = 500
+# Docker / localhost: avoid cookie quirks that can reset session after login
+enableCORS = false
+enableXsrfProtection = false
+
+[runner]
+fastReruns = false

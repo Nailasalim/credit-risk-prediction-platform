@@ -334,9 +334,9 @@ docker compose up --build
 
 | Username | Password |
 |----------|----------|
-| `analyst` | `CreditIQ2024` |
-
-Additional: `admin` / `admin123`, `risk_officer` / `risk2024`
+| `analyst` | `AnalystDemo2024` |
+| `admin` | `AdminDemo2024` |
+| `risk_officer` | `RiskDemo2024` |
 
 ### Suggested demo path (~3 min)
 

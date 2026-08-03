@@ -64,6 +64,8 @@ services:
     volumes:
       - ./data:/app/data:ro
       - ./models:/app/models
+      - ./ui:/app/ui
+      - ./.streamlit:/app/.streamlit
     depends_on:
       backend:
         condition: service_healthy
