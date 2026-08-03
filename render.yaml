@@ -1,0 +1,30 @@
+# CreditIQ — Render Blueprint (optional)
+# Dashboard: https://dashboard.render.com → New → Blueprint → connect this repo
+#
+# Before deploy:
+# 1. Push code to GitHub (including models/)
+# 2. Upload application_train.csv to a Render Disk mounted at /app/data
+#    OR set CREDIT_RISK_PORTFOLIO_CSV to a reachable path after upload
+# 3. Set GROQ_API_KEY in the service Environment tab
+
+services:
+  - type: web
+    name: creditiq
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: bash scripts/start_hosted.sh
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: PYTHONPATH
+        value: /app
+      - key: CREDIT_RISK_API_URL
+        value: http://127.0.0.1:8000
+      - key: CREDIT_RISK_PORTFOLIO_CSV
+        value: /app/data/application_train.csv
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_NL2SQL_MODEL
+        value: llama-3.3-70b-versatile
+      - key: GROQ_SUMMARY_MODEL
+        value: llama-3.3-70b-versatile

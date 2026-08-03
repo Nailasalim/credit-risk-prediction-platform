@@ -330,6 +330,19 @@ docker compose up --build
 
 ---
 
+## Public hosting (share a URL)
+
+Full guide: **[documents/HOSTING.md](documents/HOSTING.md)**
+
+1. Push code + `models/` to GitHub (not `.env` or the CSV)  
+2. Deploy on [Railway](https://railway.app) or [Render](https://render.com)  
+3. Start command: `bash scripts/start_hosted.sh`  
+4. Set env var `GROQ_API_KEY`  
+5. Upload `application_train.csv` to `/app/data/` on the host  
+6. Open the HTTPS URL → login `analyst` / `AnalystDemo2024`
+
+---
+
 ## Demo credentials
 
 | Username | Password |
